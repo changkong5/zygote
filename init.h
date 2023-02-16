@@ -31,8 +31,6 @@
 
 // --------------------------------------------------------
 
-void handle_control_message(const char *msg, const char *arg);
-
 struct command {
         /* list of commands in an action */
     struct listnode clist;

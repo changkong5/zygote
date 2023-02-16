@@ -291,69 +291,6 @@ void restart_processes(void)
                            restart_service_if_needed);
 }
 
-static void msg_start(const char *name)
-{
-    struct service *svc = NULL;
-    char *tmp = NULL;
-    char *args = NULL;
-
-    if (!strchr(name, ':'))
-        svc = service_find_by_name(name);
-    else {
-        tmp = strdup(name);
-        if (tmp) {
-            args = strchr(tmp, ':');
-            *args = '\0';
-            args++;
-
-            svc = service_find_by_name(tmp);
-        }
-    }
-
-    if (svc) {
-        service_start(svc, args);
-    } else {
-        ERROR("no such service '%s'\n", name);
-    }
-    if (tmp)
-        free(tmp);
-}
-
-static void msg_stop(const char *name)
-{
-    struct service *svc = service_find_by_name(name);
-
-    if (svc) {
-        service_stop(svc);
-    } else {
-        ERROR("no such service '%s'\n", name);
-    }
-}
-
-static void msg_restart(const char *name)
-{
-    struct service *svc = service_find_by_name(name);
-
-    if (svc) {
-        service_restart(svc);
-    } else {
-        ERROR("no such service '%s'\n", name);
-    }
-}
-
-void handle_control_message(const char *msg, const char *arg)
-{
-    if (!strcmp(msg,"start")) {
-        msg_start(arg);
-    } else if (!strcmp(msg,"stop")) {
-        msg_stop(arg);
-    } else if (!strcmp(msg,"restart")) {
-        msg_restart(arg);
-    } else {
-        ERROR("unknown control msg '%s'\n", msg);
-    }
-}
-
 static struct command *get_first_command(struct action *act)
 {
     struct listnode *node;
