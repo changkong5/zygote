@@ -33,7 +33,6 @@
 #include "init.h"
 #include "log.h"
 #include "util.h"
-#include "sockets.h"
 
 /*
  * decode_uid - decodes and returns the given string, which can be either the
