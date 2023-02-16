@@ -150,6 +150,7 @@ void service_restart(struct service *svc);
 void service_start(struct service *svc, const char *dynamic_args);
 void property_changed(const char *name, const char *value);
 
-
+int execute_one_command(void);
+void restart_processes(void);
 
 #endif	/* _INIT_INIT_H */

@@ -75,8 +75,6 @@ void sigchld_handler(int signo)
     notify_service_state(svc->name, "restarting");
 }
 
-int main_init(int argc, char **argv);
-
 int main(int argc, char *argv[])
 {
 	struct sigaction act;
@@ -97,7 +95,21 @@ int main(int argc, char *argv[])
 	/* execute all the boot actions to get us started */
     action_for_each_trigger("init", action_add_queue_tail);
     
-    main_init(argc, argv);
+	int count = 0;
+
+	for(;;) {
+		execute_one_command();
+		
+		restart_processes();
+		
+		//sleep(1);
+		
+		usleep(5000);	// 50000 微妙
+		
+		if (++count > 100) {
+			break;
+		}
+	}
     
 	return 0;
 }

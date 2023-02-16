@@ -284,7 +284,7 @@ static void restart_service_if_needed(struct service *svc)
     }
 }
 
-static void restart_processes(void)
+void restart_processes(void)
 {
     process_needs_restart = 0;
     service_for_each_flags(SVC_RESTARTING,
@@ -381,7 +381,7 @@ static int is_last_command(struct action *act, struct command *cmd)
     return (list_tail(&act->commands) == &cmd->clist);
 }
 
-void execute_one_command(void)
+int execute_one_command(void)
 {
     int ret;
 
@@ -389,7 +389,7 @@ void execute_one_command(void)
         cur_action = action_remove_queue_head();
         cur_command = NULL;
         if (!cur_action)
-            return;
+            return 0;
         INFO("processing action %p (%s)\n", cur_action, cur_action->name);
         cur_command = get_first_command(cur_action);
     } else {
@@ -397,10 +397,12 @@ void execute_one_command(void)
     }
 
     if (!cur_command)
-        return;
+        return 0;
 
     ret = cur_command->func(cur_command->nargs, cur_command->args);
     INFO("command '%s' r=%d\n", cur_command->args[0], ret);
+	
+	return 1;
 }
 
 static int console_init_action(int nargs, char **args)
@@ -417,23 +419,3 @@ static int console_init_action(int nargs, char **args)
     return 0;
 }
 
-int main_init(int argc, char **argv)
-{
-	int count = 0;
-
-	for(;;) {
-		execute_one_command();
-		
-		restart_processes();
-		
-		//sleep(1);
-		
-		usleep(5000);	// 50000 微妙
-		
-		if (++count > 100) {
-			break;
-		}
-	}
-
-	return 0;
-}
