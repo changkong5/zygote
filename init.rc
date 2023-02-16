@@ -21,6 +21,7 @@ service args ../args/main 11 22 33 44 55
 	critical
 	console
 	oneshot
+#	disabled
 	
 service popen ../c_shell/popen/main
 	critical
@@ -34,49 +35,26 @@ service system ../c_shell/system/main
 	oneshot
 	
 service execl ../c_shell/execl/main
+	oneshot
 	class core	
 	
 service execle ../c_shell/execle/main
+	oneshot
 	class core
 	
 service execlp ../c_shell/execlp/main
+	oneshot
 	class core
 	
 service execv ../c_shell/execv/main
+	oneshot
 	class core
 	
 service execve ../c_shell/execve/main
+	oneshot
 	class core
 	
 service execvp ../c_shell/execvp/main
+	oneshot
 	class core
-
-#on early-init
-    # Set init and its forked children's oom_adj.
-    # write /proc/1/oom_adj -16
-
-    # Set the security context for the init process.
-    # This should occur before anything else (e.g. ueventd) is started.
-    # setcon u:r:init:s0
-
-    # start main
-
-    # start sshd
-
-
-#service main /home/lsb/Desktop/af_unix/service/execl/main
-#    class core
-#    critical
-
-
-# service sshd /system/bin/start-ssh
-#    disabled
-
-
-# service mdnsd /system/bin/mdnsd
-#     disabled
-
-
-# service bootanim /system/bin/bootanimation
-#     disabled
 

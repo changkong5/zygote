@@ -175,7 +175,8 @@ int main(int argc, char *argv[])
 		}
 		
 		/* wait epoll event */
-        int fd_cnt = epoll_wait(epfd, events, EPOLL_LISTEN_CNT, EPOLL_LISTEN_TIMEOUT); // EPOLL_LISTEN_TIMEOUT （millisecond）
+        // int fd_cnt = epoll_wait(epfd, events, EPOLL_LISTEN_CNT, EPOLL_LISTEN_TIMEOUT); // EPOLL_LISTEN_TIMEOUT （millisecond）
+		int fd_cnt = epoll_wait(epfd, events, EPOLL_LISTEN_CNT, 100 /* millisecond */); // EPOLL_LISTEN_TIMEOUT （millisecond）
 		
 		// NOTICE("fd_cnt = %d, epfd = %d\n", fd_cnt, epfd);
 		

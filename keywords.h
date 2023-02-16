@@ -1,36 +1,6 @@
 
 #ifndef KEYWORD
-/*
 
-
-int do_domainname(int nargs, char **args);
-
-
-int do_insmod(int nargs, char **args);
-
-int do_mount_all(int nargs, char **args);
-int do_mount(int nargs, char **args);
-int do_powerctl(int nargs, char **args);
-
-int do_restorecon(int nargs, char **args);
-
-int do_setcon(int nargs, char **args);
-int do_setenforce(int nargs, char **args);
-int do_setkey(int nargs, char **args);
-int do_setprop(int nargs, char **args);
-int do_setrlimit(int nargs, char **args);
-int do_setsebool(int nargs, char **args);
-int do_swapon_all(int nargs, char **args);
-
-
-int do_sysclktz(int nargs, char **args);
-
-
-
-int do_loglevel(int nargs, char **args);
-int do_load_persist_props(int nargs, char **args);
-
-*/
 int do_chroot(int nargs, char **args);
 int do_chdir(int nargs, char **args);
 
