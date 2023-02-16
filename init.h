@@ -22,14 +22,6 @@
 #include <sys/stat.h>
 
 // --------------------------------------------------------
-typedef enum {
-    IoSchedClass_NONE,
-    IoSchedClass_RT,
-    IoSchedClass_BE,
-    IoSchedClass_IDLE,
-} IoSchedClass;
-
-
 #ifndef PATH_MAX
 #define PATH_MAX			128
 #endif
@@ -41,8 +33,7 @@ typedef enum {
 
 void handle_control_message(const char *msg, const char *arg);
 
-struct command
-{
+struct command {
         /* list of commands in an action */
     struct listnode clist;
 
@@ -66,21 +57,6 @@ struct action {
     struct command *current;
 };
 
-struct socketinfo {
-    struct socketinfo *next;
-    const char *name;
-    const char *type;
-    uid_t uid;
-    gid_t gid;
-    int perm;
-};
-
-struct svcenvinfo {
-    struct svcenvinfo *next;
-    const char *name;
-    const char *value;
-};
-
 #define SVC_DISABLED    0x01  /* do not autostart with class */
 #define SVC_ONESHOT     0x02  /* do not restart on exit */
 #define SVC_RUNNING     0x04  /* currently active */
@@ -92,12 +68,10 @@ struct svcenvinfo {
 #define SVC_RC_DISABLED 0x80  /* Remember if the disabled flag was set in the rc script */
 #define SVC_RESTART     0x100 /* Use to safely restart (stop, wait, start) a service */
 
-#define NR_SVC_SUPP_GIDS 12    /* twelve supplementary groups */
-
 #define COMMAND_RETRY_TIMEOUT 5
 
 struct service {
-        /* list of all services */
+    /* list of all services */
     struct listnode slist;
 
     const char *name;
@@ -107,27 +81,8 @@ struct service {
     pid_t pid;
     time_t time_started;    /* time of last start */
     time_t time_crashed;    /* first crash within inspection window */
-    int nr_crashed;         /* number of times crashed within window */
-    
-    uid_t uid;
-    gid_t gid;
-    gid_t supp_gids[NR_SVC_SUPP_GIDS];
-    size_t nr_supp_gids;
-
-    char *seclabel;
-
-    struct socketinfo *sockets;
-    struct svcenvinfo *envvars;
 
     struct action onrestart;  /* Actions to execute on restart. */
-    
-    /* keycodes for triggering this service via /dev/keychord */
-    int *keycodes;
-    int nkeycodes;
-    int keychord_id;
-
-    int ioprio_class;
-    int ioprio_pri;
 
     int nargs;
     /* "MUST BE AT THE END OF THE STRUCT" */
@@ -138,7 +93,6 @@ void notify_service_state(const char *name, const char *state);
 
 struct service *service_find_by_name(const char *name);
 struct service *service_find_by_pid(pid_t pid);
-struct service *service_find_by_keychord(int keychord_id);
 void service_for_each(void (*func)(struct service *svc));
 void service_for_each_class(const char *classname,
                             void (*func)(struct service *svc));

@@ -40,8 +40,6 @@
 #include "init_parser.h"
 #include "property_service.h"
 
-
-
 static int write_file(const char *path, const char *value)
 {
     int fd, ret, len;
@@ -398,7 +396,6 @@ int do_start(int nargs, char **args)
 
 int do_stop(int nargs, char **args)
 {
-
     struct service *svc;
     svc = service_find_by_name(args[1]);
     if (svc) {

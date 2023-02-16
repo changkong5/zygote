@@ -136,7 +136,6 @@ int lookup_keyword(const char *s)
     
     case 'd':
         if (!strcmp(s, "isabled")) return K_disabled;
-//        if (!strcmp(s, "omainname")) return K_domainname;
         break;
     
     case 'e':
@@ -155,21 +154,15 @@ int lookup_keyword(const char *s)
     case 'i':
         if (!strcmp(s, "oprio")) return K_ioprio;
         if (!strcmp(s, "fup")) return K_ifup;
-//        if (!strcmp(s, "nsmod")) return K_insmod;
         if (!strcmp(s, "mport")) return K_import;
         break;
         
     case 'k':
-//        if (!strcmp(s, "eycodes")) return K_keycodes;
         break;
     case 'l':
-//        if (!strcmp(s, "oglevel")) return K_loglevel;
-//        if (!strcmp(s, "oad_persist_props")) return K_load_persist_props;
         break;
     case 'm':
         if (!strcmp(s, "kdir")) return K_mkdir;
-//        if (!strcmp(s, "ount_all")) return K_mount_all;
-//        if (!strcmp(s, "ount")) return K_mount;
         break;
 
     case 'o':
@@ -178,31 +171,20 @@ int lookup_keyword(const char *s)
         if (!strcmp(s, "nrestart")) return K_onrestart;
         break;
     case 'p':
-//        if (!strcmp(s, "owerctl")) return K_powerctl;
         break;
     case 'r':
         if (!strcmp(s, "estart")) return K_restart;
-//        if (!strcmp(s, "estorecon")) return K_restorecon;
         if (!strcmp(s, "mdir")) return K_rmdir;
         if (!strcmp(s, "m")) return K_rm;
         break;
         
     case 's':
-//        if (!strcmp(s, "eclabel")) return K_seclabel;
         if (!strcmp(s, "ervice")) return K_service;
-//        if (!strcmp(s, "etcon")) return K_setcon;
-//        if (!strcmp(s, "etenforce")) return K_setenforce;
         if (!strcmp(s, "etenv")) return K_setenv;
-//        if (!strcmp(s, "etkey")) return K_setkey;
-//        if (!strcmp(s, "etprop")) return K_setprop;
-//        if (!strcmp(s, "etrlimit")) return K_setrlimit;
-//        if (!strcmp(s, "etsebool")) return K_setsebool;
         if (!strcmp(s, "ocket")) return K_socket;
         if (!strcmp(s, "tart")) return K_start;
         if (!strcmp(s, "top")) return K_stop;
-//        if (!strcmp(s, "wapon_all")) return K_swapon_all;
         if (!strcmp(s, "ymlink")) return K_symlink;
-//        if (!strcmp(s, "ysclktz")) return K_sysclktz;
         break;
         
     case 't':
@@ -210,7 +192,6 @@ int lookup_keyword(const char *s)
         break;
         
     case 'u':
-//        if (!strcmp(s, "ser")) return K_user;
         break;
         
     case 'w':
@@ -505,19 +486,6 @@ struct service *service_find_by_pid(pid_t pid)
     return 0;
 }
 
-struct service *service_find_by_keychord(int keychord_id)
-{
-    struct listnode *node;
-    struct service *svc;
-    list_for_each(node, &service_list) {
-        svc = node_to_item(node, struct service, slist);
-        if (svc->keychord_id == keychord_id) {
-            return svc;
-        }
-    }
-    return 0;
-}
-
 void service_for_each(void (*func)(struct service *svc))
 {
     struct listnode *node;
@@ -587,7 +555,7 @@ void queue_property_triggers(const char *name, const char *value)
     }
 }
 
-void queue_all_property_triggers()
+void queue_all_property_triggers(void)
 {
     struct listnode *node;
     struct action *act;
@@ -658,7 +626,7 @@ struct action *action_remove_queue_head(void)
     }
 }
 
-int action_queue_empty()
+int action_queue_empty(void)
 {
     return list_empty(&action_queue);
 }
@@ -708,8 +676,6 @@ static void parse_line_service(struct parse_state *state, int nargs, char **args
         return;
     }
 
-    svc->ioprio_class = IoSchedClass_NONE;
-
     kw = lookup_keyword(args[0]);
     switch (kw) {
     case K_capability:
@@ -729,56 +695,10 @@ static void parse_line_service(struct parse_state *state, int nargs, char **args
         svc->flags |= SVC_RC_DISABLED;
         break;
     case K_ioprio:
-        if (nargs != 3) {
-            parse_error(state, "ioprio optin usage: ioprio <rt|be|idle> <ioprio 0-7>\n");
-        } else {
-            svc->ioprio_pri = strtoul(args[2], 0, 8);
-
-            if (svc->ioprio_pri < 0 || svc->ioprio_pri > 7) {
-                parse_error(state, "priority value must be range 0 - 7\n");
-                break;
-            }
-
-            if (!strcmp(args[1], "rt")) {
-                svc->ioprio_class = IoSchedClass_RT;
-            } else if (!strcmp(args[1], "be")) {
-                svc->ioprio_class = IoSchedClass_BE;
-            } else if (!strcmp(args[1], "idle")) {
-                svc->ioprio_class = IoSchedClass_IDLE;
-            } else {
-                parse_error(state, "ioprio option usage: ioprio <rt|be|idle> <0-7>\n");
-            }
-        }
         break;
     case K_group:
-        if (nargs < 2) {
-            parse_error(state, "group option requires a group id\n");
-        } else if (nargs > NR_SVC_SUPP_GIDS + 2) {
-            parse_error(state, "group option accepts at most %d supp. groups\n",
-                        NR_SVC_SUPP_GIDS);
-        } else {
-            int n;
-            svc->gid = decode_uid(args[1]);
-            for (n = 2; n < nargs; n++) {
-                svc->supp_gids[n-2] = decode_uid(args[n]);
-            }
-            svc->nr_supp_gids = n - 2;
-        }
         break;
     case K_keycodes:
-        if (nargs < 2) {
-            parse_error(state, "keycodes option requires atleast one keycode\n");
-        } else {
-            svc->keycodes = malloc((nargs - 1) * sizeof(svc->keycodes[0]));
-            if (!svc->keycodes) {
-                parse_error(state, "could not allocate keycodes\n");
-            } else {
-                svc->nkeycodes = nargs - 1;
-                for (i = 1; i < nargs; i++) {
-                    svc->keycodes[i - 1] = atoi(args[i]);
-                }
-            }
-        }
         break;
     case K_oneshot:
         svc->flags |= SVC_ONESHOT;
@@ -807,63 +727,13 @@ static void parse_line_service(struct parse_state *state, int nargs, char **args
     case K_critical:
         svc->flags |= SVC_CRITICAL;
         break;
-    case K_setenv: { /* name value */
-        struct svcenvinfo *ei;
-        if (nargs < 2) {
-            parse_error(state, "setenv option requires name and value arguments\n");
-            break;
-        }
-        ei = calloc(1, sizeof(*ei));
-        if (!ei) {
-            parse_error(state, "out of memory\n");
-            break;
-        }
-        ei->name = args[1];
-        ei->value = args[2];
-        ei->next = svc->envvars;
-        svc->envvars = ei;
-        break;
-    }
-    case K_socket: {/* name type perm [ uid gid ] */
-        struct socketinfo *si;
-        if (nargs < 4) {
-            parse_error(state, "socket option requires name, type, perm arguments\n");
-            break;
-        }
-        if (strcmp(args[2],"dgram") && strcmp(args[2],"stream")
-                && strcmp(args[2],"seqpacket")) {
-            parse_error(state, "socket type must be 'dgram', 'stream' or 'seqpacket'\n");
-            break;
-        }
-        si = calloc(1, sizeof(*si));
-        if (!si) {
-            parse_error(state, "out of memory\n");
-            break;
-        }
-        si->name = args[1];
-        si->type = args[2];
-        si->perm = strtoul(args[3], 0, 8);
-        if (nargs > 4)
-            si->uid = decode_uid(args[4]);
-        if (nargs > 5)
-            si->gid = decode_uid(args[5]);
-        si->next = svc->sockets;
-        svc->sockets = si;
-        break;
-    }
+    case K_setenv: 
+		break;
+    case K_socket: 
+		break;
     case K_user:
-        if (nargs != 2) {
-            parse_error(state, "user option requires a user id\n");
-        } else {
-            svc->uid = decode_uid(args[1]);
-        }
         break;
     case K_seclabel:
-        if (nargs != 2) {
-            parse_error(state, "seclabel option requires a label string\n");
-        } else {
-            svc->seclabel = args[1];
-        }
         break;
 
     default:
